@@ -43,10 +43,24 @@ def wallet(*args: str) -> str:
     return btc("-rpcwallet=lab-miner", *args)
 
 
+def json_result(output: str, origin: str):
+    """Mostra a operacao e uma amostra da resposta se nao for JSON valido."""
+    try:
+        return json.loads(output)
+    except json.JSONDecodeError as exc:
+        preview = output[:500] if output else "(resposta vazia)"
+        raise RuntimeError(
+            f"{origin} nao retornou JSON valido. Inicio da resposta: {preview!r}"
+        ) from exc
+
+
 def ln(node: str, *args: str) -> dict:
+    # Nao permitir notificacoes '# ...' antes do JSON (ex.: comando pay).
     output = compose("exec", "-T", f"lightning-{node}",
-                     "lightning-cli", "--network=regtest", *args)
-    return json.loads(output)
+                     "lightning-cli", "--network=regtest",
+                     "--json", "--notifications=none", *args)
+    operation = args[0] if args else "(sem comando)"
+    return json_result(output, f"lightning-{node} {operation}")
 
 
 def retry(message: str, fn, timeout: int = 120, interval: int = 3):
@@ -70,12 +84,12 @@ def mine(blocks: int) -> None:
 
 
 def ensure_wallet() -> None:
-    wallets = json.loads(btc("listwalletdir"))["wallets"]
+    wallets = json_result(btc("listwalletdir"), "bitcoin listwalletdir")["wallets"]
     names = {w["name"] for w in wallets}
     if "lab-miner" not in names:
         btc("createwallet", "lab-miner")
     else:
-        loaded = json.loads(btc("listwallets"))
+        loaded = json_result(btc("listwallets"), "bitcoin listwallets")
         if "lab-miner" not in loaded:
             btc("loadwallet", "lab-miner")
 
@@ -119,7 +133,7 @@ def main():
     print("CARTORIO DIGITAL BITCOIN | REGTEST, SEM BTC REAL", flush=True)
     print("• Iniciando quatro conteineres Docker...", flush=True)
     compose("up", "-d", "--build")
-    retry("Aguardando Bitcoin Core", lambda: json.loads(btc("getblockchaininfo")))
+    retry("Aguardando Bitcoin Core", lambda: json_result(btc("getblockchaininfo"), "bitcoin getblockchaininfo"))
     for node in ("a", "b", "c"):
         retry(f"Aguardando Lightning {node.upper()}", lambda n=node: ln(n, "getinfo"), 180)
 
