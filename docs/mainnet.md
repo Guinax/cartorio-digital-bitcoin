@@ -195,6 +195,16 @@ confirmacoes. Esta entrega nao executou esse pagamento nem financia a liquidez
 necessaria. Faturas expiradas continuam preservadas, e a versao atual nao
 as substitui automaticamente; isso evita criar cobrancas concorrentes.
 
+## Validacao desta entrega
+
+Em 01/11/2026, os [testes desta versao foram aprovados](https://github.com/Guinax/cartorio-digital-bitcoin/actions/runs/41326390942):
+42 testes de assinatura, chave protegida, backup/restauracao, fila persistente,
+diagnostico e HTTPS local, seguidos da integracao completa de documentos e
+pagamento A -> B -> C com os nos executando em regtest. O teste confirmou
+recebimento ficticio e nova taxa de 1.250 msat em B. Nenhum BTC real foi movido.
+A verificacao de documento e o recebimento em mainnet continuam pendentes da
+instalacao e validacao no servidor de producao.
+
 Referencias oficiais: [Bitcoin Core](https://bitcoincore.org/),
 [CLNRest](https://docs.corelightning.org/docs/rest),
 [Runes](https://docs.corelightning.org/reference/createrune),
