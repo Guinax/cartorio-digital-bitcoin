@@ -26,6 +26,21 @@ python3 laboratorio-lightning/run_lab.py
 
 Na primeira execução o Docker baixará imagens e construirá a imagem do Core Lightning. Pode demorar e usar recursos cobrados do Codespaces. Confira seu limite e encerre o Codespace quando terminar.
 
+### Etapa 2: testar cinco pagamentos e medir novas taxas
+
+Depois de executar o laboratorio e confirmar o primeiro pagamento, rode na raiz do projeto:
+
+```bash
+git pull && python3 laboratorio-lightning/teste_taxas.py
+```
+
+Esse teste em **regtest** envia cinco pagamentos ficticios de A para C, passando por B.
+O resumo mostra quantos encaminhamentos foram liquidados, as **novas taxas**
+de B em millisatoshis (msat) e o total acumulado. O valor anterior nao e
+contado como ganho novo. O teste nao usa bitcoins reais e nao configura
+uma operacao publica. Se algum pagamento falhar, o script mostra o erro;
+nao remova volumes Docker para tentar corrigir sem antes diagnosticar.
+
 ### Consultar encaminhamentos e taxas em B
 
 ```bash
