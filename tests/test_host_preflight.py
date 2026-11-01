@@ -36,6 +36,21 @@ class HostPreflightTests(unittest.TestCase):
                 result = module.run(root, sys_root=root)
             self.assertTrue(result["ready_for_host_setup"])
 
+    def test_oracle_free_tier_pruned_volume_can_pass_explicit_limits(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            (root / "proc").mkdir()
+            (root / "proc/meminfo").write_text("MemTotal: 12582912 kB\\n")
+            disk = type("Disk", (), {"total": 150 * 10**9, "free": 80 * 10**9})()
+            with patch.object(module.platform, "system", return_value="Linux"), \\
+                    patch.object(module.shutil, "which", return_value="/usr/bin/fake"), \\
+                    patch.object(module.shutil, "disk_usage", return_value=disk):
+                archive = module.run(root, sys_root=root)
+                pruned = module.run(root, sys_root=root, min_volume_gib=120,
+                                    min_free_gib=35, min_ram_gib=8)
+            self.assertFalse(archive["ready_for_host_setup"])
+            self.assertTrue(pruned["ready_for_host_setup"])
+
     def test_missing_directory_fails_without_mutation(self):
         with tempfile.TemporaryDirectory() as d:
             root = Path(d)
