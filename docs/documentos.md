@@ -132,21 +132,17 @@ apague volumes para corrigir. Faturas expiram em uma hora; esta versao nao
 recria uma fatura expirada do mesmo registro. Preserve o registro e resolva
 com o operador antes de realizar outra cobranca.
 
-Para conectar um **no real ja preparado pelo operador**, configure o comando
-local como lista JSON (sem shell) e a rede de cobranca explicitamente:
+Para usar um **no real**, configure obrigatoriamente o [perfil mainnet](mainnet.md)
+com `--config /etc/cartorio/config.json`. O caminho legado
+`--network bitcoin` sem `--config` agora e intencionalmente recusado:
+aquele caminho nao tinha as travas de diagnostico, limites e pausa de faturas
+que a operacao financeira exige. O perfil de producao usa CLNRest HTTPS e
+Rune restrita. Os comandos regtest do laboratorio permanecem disponiveis.
 
-```bash
-export CARTORIO_LIGHTNING_COMMAND='["lightning-cli", "--network=bitcoin", "--lightning-dir=/caminho/no-real"]'
-python3 -m cartorio_documentos --network bitcoin --fee-msat VALOR_EM_MSAT register /caminho/documento.pdf
-python3 -m cartorio_documentos --network bitcoin invoice ID
-python3 -m cartorio_documentos --network bitcoin sync-payment ID
-```
-
-Esses comandos apenas conectam um no existente; nao configuram ou financiam
-canais. Rede, identificador, valor esperado, valor recebido, hash de pagamento
-e preimagem precisam conferir antes de marcar `paid`. Nao existe endpoint
-para o cliente dizer que pagou. Sem confirmacao da tarifa, `stamp` e bloqueado.
-O modulo nao possui comando para pagar, sacar ou abrir canais.
+Nenhuma parte do programa financia canais, escolhe pares, envia pagamentos
+ou libera faturas mainnet automaticamente. A emissao permanece desligada com
+`allow_mainnet_invoices=false` ate a validacao operacional e autorizacao
+expressa de movimentacao de BTC.
 
 ## Limite do modelo de pedagio
 
