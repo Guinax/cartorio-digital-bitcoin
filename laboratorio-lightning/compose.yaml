@@ -1,0 +1,64 @@
+# Laboratorio local: bitcoins ficticios (regtest), nunca mainnet
+name: cartorio-lightning-regtest
+
+x-lightning: &lightning
+  build:
+    context: .
+    dockerfile: Dockerfile.cln
+  depends_on:
+    - bitcoin
+  restart: unless-stopped
+  networks:
+    - laboratorio
+  command:
+    - --network=regtest
+    - --bitcoin-rpcconnect=bitcoin
+    - --bitcoin-rpcport=18443
+    - --bitcoin-rpcuser=lab
+    - --bitcoin-rpcpassword=apenas-regtest-sem-valor
+    - --bind-addr=0.0.0.0:9735
+    - --log-level=info
+
+services:
+  bitcoin:
+    image: bitcoin/bitcoin:29.4
+    command:
+      - -regtest=1
+      - -server=1
+      - -txindex=1
+      - -rpcuser=lab
+      - -rpcpassword=apenas-regtest-sem-valor
+      - -rpcbind=0.0.0.0
+      - -rpcallowip=0.0.0.0/0
+      - -fallbackfee=0.0002
+      - -printtoconsole
+    volumes:
+      - bitcoin_data:/home/bitcoin/.bitcoin
+    restart: unless-stopped
+    networks:
+      - laboratorio
+
+  lightning-a:
+    <<: *lightning
+    volumes:
+      - node_a:/root/.lightning
+
+  lightning-b:
+    <<: *lightning
+    volumes:
+      - node_b:/root/.lightning
+
+  lightning-c:
+    <<: *lightning
+    volumes:
+      - node_c:/root/.lightning
+
+volumes:
+  bitcoin_data:
+  node_a:
+  node_b:
+  node_c:
+
+networks:
+  laboratorio:
+    internal: true
