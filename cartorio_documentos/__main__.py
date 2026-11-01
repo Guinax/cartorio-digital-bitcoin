@@ -76,6 +76,10 @@ def parser():
 
 
 def run(args):
+    # Sem perfil de producao nao ha limite de faturas, auditoria nem gate.
+    # Proibir a rede monetaria no caminho legado evita uma ativacao acidental.
+    if not args.config and args.network == "bitcoin":
+        raise RegistryError("Mainnet exige --config com perfil de producao; nunca use --network bitcoin isoladamente.")
     if args.config:
         from .production import load_config, registry_for
         args.config_data = load_config(args.config)
