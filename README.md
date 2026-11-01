@@ -15,6 +15,23 @@ ou veracidade do documento e nao emite atos de um cartorio oficial.
 
 Instalacao e comandos: [manual do modulo](docs/documentos.md).
 
+### Testar documento e pagamento juntos
+
+Depois de instalar as dependencias do modulo, execute na raiz do projeto:
+
+```bash
+python3 laboratorio-lightning/teste_documentos.py --preparar
+```
+
+Esse comando inicia ou retoma o laboratorio, registra um arquivo sintetico,
+gera uma fatura, paga de A para C via B, confere o recebimento da tarifa e
+mede somente as novas taxas de B. Tambem testa o bloqueio antes do pagamento
+e a recusa de um arquivo alterado. Tudo ocorre em **regtest, sem BTC real**;
+nao e uma confirmacao de documento no Bitcoin mainnet e nao envia dados
+a calendarios publicos. Os volumes existentes sao preservados.
+
+[Acompanhar os testes automaticos](https://github.com/Guinax/cartorio-digital-bitcoin/actions/workflows/documentos.yml).
+
 O modulo nao controla a rede Bitcoin nem cobra por transacoes observadas.
 A tarifa de registro remunera o nosso servico. Taxas de roteamento Lightning
 ocorrem apenas nos pagamentos encaminhados com sucesso pelo proprio no.

@@ -178,6 +178,25 @@ pagamento, subpagamento, preimagem, redes e reorg. Calendarios, no Bitcoin
 e no Lightning sao simulados nos testes; isso nao comprova uma operacao
 financeira mainnet. Validacao de ponta a ponta exige os servicos correspondentes.
 
+Para validar o recebimento com Bitcoin Core e tres nos Core Lightning em
+execucao, sem mocks e usando exclusivamente regtest:
+
+```bash
+python3 laboratorio-lightning/teste_documentos.py --preparar
+```
+
+Sem `--preparar`, o teste usa o laboratorio ja iniciado. Ele usa um banco e
+uma chave temporarios exclusivos, gera um documento sintetico, verifica
+assinatura, exige pagamento, paga A -> B -> C, confirma a fatura em C e mede
+somente novas taxas em B. Antes do pagamento, confere a rede de todos os nos.
+Nao modifica o banco de documentos do operador nem apaga volumes do Docker.
+Nao envia compromissos a calendarios publicos e nao afirma confirmar mainnet.
+
+O workflow `.github/workflows/documentos.yml` executa os testes locais e essa
+integracao em um servidor temporario do GitHub. O resumo publicado inclui
+somente os resultados e valores ficticios, sem chaves privadas, preimagens ou
+faturas. Pode ser repetido pela aba Actions, em `Run workflow`.
+
 Referencias primarias:
 
 - [OpenTimestamps](https://opentimestamps.org/)

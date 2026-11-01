@@ -1,0 +1,75 @@
+name: Documentos e Lightning (regtest)
+
+on:
+  push:
+    branches: [Master]
+    paths:
+      - cartorio_documentos/**
+      - laboratorio-lightning/**
+      - tests/**
+      - requirements-documentos.txt
+      - .github/workflows/documentos.yml
+  pull_request:
+    paths:
+      - cartorio_documentos/**
+      - laboratorio-lightning/**
+      - tests/**
+      - requirements-documentos.txt
+      - .github/workflows/documentos.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: documentos-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit:
+    name: Assinaturas, provas e cobranca
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements-documentos.txt
+      - run: python -m unittest discover -s tests -v
+
+  integration:
+    name: Documento e pagamento A -> B -> C
+    needs: unit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements-documentos.txt
+      - name: Conferir Docker Compose
+        run: docker compose version
+      - name: Preparar regtest e testar registro e recebimento
+        run: python laboratorio-lightning/teste_documentos.py --preparar --output .test-results/documentos-regtest.json
+      - name: Logs do laboratorio em caso de falha
+        if: failure()
+        run: |
+          docker compose -f laboratorio-lightning/compose.yaml ps -a
+          docker compose -f laboratorio-lightning/compose.yaml logs --no-color --tail=100
+      - name: Guardar resumo sem chaves ou faturas
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: documentos-regtest
+          path: .test-results/documentos-regtest.json
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Desligar os conteineres
+        if: always()
+        run: docker compose -f laboratorio-lightning/compose.yaml down

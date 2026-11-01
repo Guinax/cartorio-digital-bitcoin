@@ -11,3 +11,4 @@ __pycache__/
 issuer-private.pem
 *.ots
 *.ots.bak
+.test-results/
