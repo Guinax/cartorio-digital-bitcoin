@@ -53,6 +53,33 @@ docker compose -f laboratorio-lightning/compose.yaml exec -T lightning-b lightni
 docker compose -f laboratorio-lightning/compose.yaml ps
 ```
 
+### Se um contêiner Lightning ficar reiniciando
+
+A configuração inicia `lightningd` diretamente em primeiro plano, com `init`
+e rede `regtest` explícita. Isso evita depender do wrapper da imagem, que
+calcula o diretório RPC usando `LIGHTNINGD_NETWORK=bitcoin` por padrão,
+mesmo quando o comando seleciona regtest.
+
+No Codespace existente, atualize os arquivos e execute novamente a preparação:
+
+```bash
+git pull --ff-only
+python3 laboratorio-lightning/run_lab.py
+```
+
+O script recria os contêineres quando a configuração muda e mantém os volumes.
+Execute `teste_taxas.py` somente depois que a preparação mostrar `SUCESSO`.
+Se a falha continuar, consulte o estado e os logs antes de outra alteração:
+
+```bash
+docker compose -f laboratorio-lightning/compose.yaml ps -a
+docker compose -f laboratorio-lightning/compose.yaml logs --tail=80
+```
+
+Não use `down -v` para corrigir reinícios: esse comando apaga os volumes.
+A mudança de inicialização precisa ser validada executando o laboratório
+no Docker; a revisão de configuração, sozinha, não comprova os pagamentos.
+
 ### Desligar os contêineres quando terminar
 
 ```bash
