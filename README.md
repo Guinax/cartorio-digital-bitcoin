@@ -17,6 +17,7 @@ Instalacao e comandos: [manual do modulo](docs/documentos.md).
 
 Preparacao para a rede principal: [perfil mainnet, backups e operacao continua](docs/mainnet.md).
 Hospedagem sem mensalidade para testes prolongados: [Oracle Cloud Always Free ARM64, Bitcoin Core podado e Core Lightning](deploy/oci-always-free/README.md).
+Sem cartão de crédito: [nó Linux próprio com Tor e alternativas para recebimento Lightning](deploy/sem-cartao/README.md). Esta segunda opção não instala servidor nem ativa pagamentos automaticamente.
 **A Oracle pode recuperar VMs gratuitas; nao se trata de infraestrutura financeira com SLA.**
 O perfil inclui chave criptografada, CLNRest HTTPS com acesso restrito,
 diagnostico antes de novas faturas e worker para reconciliar pagamentos e
