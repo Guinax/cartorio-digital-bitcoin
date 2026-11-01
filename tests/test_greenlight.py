@@ -85,6 +85,22 @@ class GreenlightTests(unittest.TestCase):
             self.inspect()
         self.assertFalse(SDK.called)
 
+    def test_opaque_binary_credentials_are_not_trimmed(self):
+        original = b"\\x20private-synthetic-credentials\\n"
+        atomic_private(self.path, original)
+
+        class ExactCredentials:
+            @staticmethod
+            def from_bytes(value):
+                self.assertEqual(value, original)
+                return object()
+
+        class ExactSdk(SDK):
+            Credentials = ExactCredentials
+
+        result = GreenlightStatus(self.path, ID, sdk=ExactSdk).check()
+        self.assertTrue(result["authenticated_identity"])
+
     def test_provider_error_redacted(self):
         SDK.response = object()
         with self.assertRaises(RegistryError):
