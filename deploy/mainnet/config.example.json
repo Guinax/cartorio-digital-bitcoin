@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "data_dir": "/srv/cartorio/data",
+  "key_password_file": "/etc/cartorio/issuer-password",
+  "backup_dir": "/srv/cartorio-backups",
+  "backup_key_file": "/etc/cartorio/backup.key",
+  "bitcoin_rpc_url": "http://127.0.0.1:8332",
+  "bitcoin_cookie_file": "/var/lib/bitcoind/.cookie",
+  "lightning_rest_url": "https://127.0.0.1:3010",
+  "lightning_ca_file": "/etc/cartorio/cln-ca.pem",
+  "lightning_rune_file": "/etc/cartorio/receiver.rune",
+  "lightning_node_id": "PREENCHER_COM_A_CHAVE_PUBLICA_REAL_DO_NO",
+  "allow_mainnet_invoices": false,
+  "service_fee_msat": 0,
+  "max_invoice_msat": 10000000,
+  "min_confirmations": 6,
+  "worker_interval_seconds": 300,
+  "backup_interval_seconds": 21600,
+  "max_records_per_cycle": 25,
+  "max_tip_age_seconds": 10800
+}

@@ -4,6 +4,9 @@ from __future__ import annotations
 import hashlib
 import json
 import subprocess
+from pathlib import Path
+from urllib.parse import urlsplit
+from urllib.request import Request
 
 from .registry import Registry, RegistryError
 
@@ -23,7 +26,7 @@ class CoreLightning:
         self.command, self.network = command, network
 
     def call(self, method: str, **params):
-        if method not in {"getinfo", "invoice", "listinvoices", "listforwards"}:
+        if method not in {"getinfo", "invoice", "listinvoices", "listforwards", "listpeerchannels"}:
             raise RegistryError("Operacao Lightning nao permitida pelo modulo de documentos.")
         try:
             result = subprocess.run([*self.command, "--json", "--notifications=none", "-k", method,
@@ -41,6 +44,49 @@ class CoreLightning:
     def ensure_network(self, expected: str) -> None:
         if self.network != expected or self.call("getinfo").get("network") != expected:
             raise RegistryError("Rede do no diferente da rede deste registro. Pagamento nao confirmado.")
+
+
+class CoreLightningREST:
+    """CLNRest HTTPS com Rune restrita; sem socket RPC da carteira no processo."""
+    def __init__(self, url: str, rune_file: str | Path, ca_file: str | Path, *, invoice_gate=None, node_id=None):
+        from .security import secure_opener
+        parsed = urlsplit(url)
+        if (parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password
+                or parsed.query or parsed.fragment or parsed.path not in {"", "/"}):
+            raise RegistryError("CLNRest exige URL HTTPS de origem, sem credenciais, caminho ou parametros.")
+        self.url, self.rune_file, self.network = url.rstrip("/"), Path(rune_file), "bitcoin"
+        self.opener = secure_opener(str(ca_file) if ca_file else None)
+        self.invoice_gate = invoice_gate
+        self.expected_node_id = node_id
+
+    def call(self, method: str, **params):
+        from .security import private_read, read_json
+        if method not in {"getinfo", "invoice", "listinvoices", "listforwards", "listpeerchannels"}:
+            raise RegistryError("Operacao Lightning nao permitida neste cliente restrito.")
+        if method == "invoice" and self.invoice_gate:
+            self.invoice_gate(msat(params["amount_msat"]))
+        rune = private_read(self.rune_file).decode("ascii")
+        if "\r" in rune or "\n" in rune:
+            raise RegistryError("Credencial Rune invalida.")
+        request = Request(self.url + "/v1/" + method, data=json.dumps(params).encode(),
+                          headers={"Content-Type": "application/json", "Rune": rune})
+        try:
+            with self.opener.open(request, timeout=20) as response:
+                result = read_json(response)
+        except Exception as exc:
+            raise RegistryError("CLNRest indisponivel ou credencial/certificado recusado.") from exc
+        if not isinstance(result, dict) or "error" in result:
+            raise RegistryError("Resposta CLNRest invalida.")
+        return result
+
+    def ensure_network(self, expected: str) -> None:
+        info = self.call("getinfo")
+        if expected != "bitcoin" or info.get("network") != "bitcoin":
+            raise RegistryError("O perfil de producao exige Lightning na rede bitcoin.")
+        if self.expected_node_id and info.get("id") != self.expected_node_id:
+            raise RegistryError("Identidade do no Lightning diferente da configurada.")
+        if info.get("warning_bitcoind_sync") or info.get("warning_lightningd_sync"):
+            raise RegistryError("O no Lightning ainda nao esta sincronizado.")
 
 
 def invoice_for(registry: Registry, record_id: str, node: CoreLightning) -> dict:

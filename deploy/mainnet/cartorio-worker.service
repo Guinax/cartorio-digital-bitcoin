@@ -1,0 +1,31 @@
+[Unit]
+Description=Cartorio Bitcoin - processamento de documentos mainnet
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=900
+StartLimitBurst=10
+
+[Service]
+Type=simple
+User=cartorio
+Group=cartorio
+WorkingDirectory=/opt/cartorio
+ExecStart=/opt/cartorio/.venv/bin/python -m cartorio_documentos --config /etc/cartorio/config.json work
+Restart=on-failure
+RestartSec=60
+TimeoutStopSec=120
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/srv/cartorio/data /srv/cartorio-backups
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CapabilityBoundingSet=
+AmbientCapabilities=
+LimitNOFILE=1024
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -74,7 +74,8 @@ def verify_receipt(receipt: dict, file: str | Path, trusted_public_key: bytes) -
 
 
 class Registry:
-    def __init__(self, directory: str | Path, *, fee_msat: int = 0, network: str = "regtest"):
+    def __init__(self, directory: str | Path, *, fee_msat: int = 0, network: str = "regtest",
+                 password: bytes | None = None, require_encrypted_key: bool = False):
         if type(fee_msat) is not int or fee_msat < 0:
             raise RegistryError("A tarifa deve ser um inteiro nao negativo em msat.")
         if network not in {"regtest", "bitcoin", "testnet", "signet"}:
@@ -83,6 +84,7 @@ class Registry:
         self.db_path = self.directory / "registry.sqlite3"
         self.key_path = self.directory / "issuer-private.pem"
         self.fee_msat, self.network = fee_msat, network
+        self.password, self.require_encrypted_key = password, require_encrypted_key
 
     def initialize(self) -> dict:
         self.directory.mkdir(parents=True, exist_ok=True, mode=0o700)
@@ -90,8 +92,10 @@ class Registry:
             if self.db_path.exists() and self.db_path.stat().st_size:
                 raise RegistryError("Banco existente sem chave. Restaure a chave original; nao gere outra por cima.")
             key = Ed25519PrivateKey.generate()
-            raw = key.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8,
-                                    serialization.NoEncryption())
+            if self.require_encrypted_key and not self.password:
+                raise RegistryError("Perfil de producao exige senha da chave em arquivo privado.")
+            encryption = serialization.BestAvailableEncryption(self.password) if self.password else serialization.NoEncryption()
+            raw = key.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, encryption)
             fd = os.open(self.key_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
             with os.fdopen(fd, "wb") as target:
                 target.write(raw)
@@ -120,10 +124,31 @@ class Registry:
     def key(self) -> Ed25519PrivateKey:
         if not self.key_path.exists():
             raise RegistryError("Registro nao inicializado. Execute init primeiro.")
-        key = serialization.load_pem_private_key(self.key_path.read_bytes(), password=None)
+        raw = self.key_path.read_bytes()
+        encrypted = b"ENCRYPTED PRIVATE KEY" in raw
+        if self.require_encrypted_key and not encrypted:
+            raise RegistryError("Chave ainda sem criptografia. Use protect-key antes do perfil de producao.")
+        try:
+            key = serialization.load_pem_private_key(raw, password=self.password if encrypted else None)
+        except (TypeError, ValueError) as exc:
+            raise RegistryError("Nao foi possivel abrir a chave. Confira o arquivo privado de senha.") from exc
         if not isinstance(key, Ed25519PrivateKey):
             raise RegistryError("A chave do emissor precisa ser Ed25519.")
         return key
+
+    def protect_key(self) -> dict:
+        if not self.password or len(self.password) < 16:
+            raise RegistryError("Use um arquivo privado de senha com pelo menos 16 bytes.")
+        from .security import atomic_private
+        key = self.key()
+        identity = fingerprint(key.public_key())
+        with self.connection() as db:
+            if db.execute("SELECT 1 FROM records WHERE issuer_key_sha256 != ? LIMIT 1", (identity,)).fetchone():
+                raise RegistryError("Chave nao corresponde ao banco existente.")
+        raw = key.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8,
+                                serialization.BestAvailableEncryption(self.password))
+        atomic_private(self.key_path, raw)
+        return {"encrypted": True, "issuer_key_sha256": identity}
 
     @contextmanager
     def connection(self):

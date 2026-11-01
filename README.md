@@ -15,6 +15,12 @@ ou veracidade do documento e nao emite atos de um cartorio oficial.
 
 Instalacao e comandos: [manual do modulo](docs/documentos.md).
 
+Preparacao para a rede principal: [perfil mainnet, backups e operacao continua](docs/mainnet.md).
+O perfil inclui chave criptografada, CLNRest HTTPS com acesso restrito,
+diagnostico antes de novas faturas e worker para reconciliar pagamentos e
+revalidar provas. Os modelos ficam em `deploy/mainnet/`; a emissao mainnet
+vem pausada e depende da configuracao dos nos e do servidor.
+
 ### Testar documento e pagamento juntos
 
 Depois de instalar as dependencias do modulo, execute na raiz do projeto:

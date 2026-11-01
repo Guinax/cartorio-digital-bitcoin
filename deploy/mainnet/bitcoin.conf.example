@@ -1,0 +1,12 @@
+# Exemplo para um Bitcoin Core mainnet dedicado e sem carteira.
+# Ajustar no servidor; nao e usado pelo laboratorio regtest.
+chain=main
+server=1
+disablewallet=1
+rpcbind=127.0.0.1
+rpcallowip=127.0.0.1
+# O cookie fica privado. Se outro usuario local precisar consultar RPC,
+# configure um grupo dedicado e rpccookieperms=group no Bitcoin Core compativel.
+# Nao publique a porta RPC 8332 na internet.
+# Arquivamento facilita recuperacoes longas do no Lightning; dimensionar o disco.
+prune=0

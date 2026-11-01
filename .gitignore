@@ -12,3 +12,9 @@ issuer-private.pem
 *.ots
 *.ots.bak
 .test-results/
+*.backup
+backup.key
+receiver.rune
+issuer-password
+worker-status.json
+backup-status.json

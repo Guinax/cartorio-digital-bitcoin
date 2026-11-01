@@ -1,0 +1,11 @@
+# Adicionar a configuracao de um no CLN mainnet ja preparado pelo operador.
+# Nao habilita abertura automatica de canais ou financiamento.
+network=bitcoin
+bitcoin-rpcconnect=127.0.0.1
+bitcoin-rpcport=8332
+bitcoin-datadir=/var/lib/bitcoind
+clnrest-host=127.0.0.1
+clnrest-port=3010
+clnrest-protocol=https
+clnrest-cors-origins=https://127.0.0.1:3010
+# Nao copiar hsm_secret, senha RPC ou Rune para o repositorio.

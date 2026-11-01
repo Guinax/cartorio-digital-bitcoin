@@ -162,11 +162,13 @@ O modulo nao cria custodia, escrow ou coassinatura de transferencias.
 
 ## Limites operacionais e testes
 
-Esta primeira versao fornece biblioteca Python e CLI **local do operador**.
+O modulo fornece biblioteca Python e CLI **local do operador**.
 Nao ha interface publica, contas de clientes, API multiusuario, envio remoto
 de arquivos ou autenticacao de identidade. Nao exponha um terminal ou socket
-RPC como se fosse uma API publica. Banco e provas sao locais e persistentes;
-nao ha exportacao automatica de backup ou atualizacao automatica de provas.
+RPC como se fosse uma API publica. Banco e provas sao locais e persistentes.
+O [perfil mainnet](mainnet.md) acrescenta backups criptografados, restauracao,
+diagnostico de prontidao e worker para atualizar e revalidar provas. A copia
+externa dos backups e os backups da carteira Lightning exigem rotinas proprias.
 
 ```bash
 python3 -m unittest discover -s tests -v

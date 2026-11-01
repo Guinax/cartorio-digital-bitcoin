@@ -8,6 +8,7 @@ on:
       - laboratorio-lightning/**
       - tests/**
       - requirements-documentos.txt
+      - deploy/mainnet/**
       - .github/workflows/documentos.yml
   pull_request:
     paths:
@@ -15,6 +16,7 @@ on:
       - laboratorio-lightning/**
       - tests/**
       - requirements-documentos.txt
+      - deploy/mainnet/**
       - .github/workflows/documentos.yml
   workflow_dispatch:
 

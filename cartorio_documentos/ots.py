@@ -6,7 +6,7 @@ import json
 import os
 from pathlib import Path
 from urllib.parse import urlsplit
-from urllib.request import Request, urlopen
+from urllib.request import Request
 
 from bitcoin.core import CBlockHeader, b2lx
 from opentimestamps.calendar import RemoteCalendar
@@ -99,15 +99,19 @@ def _merge_at(timestamp: Timestamp, message: bytes, response: Timestamp) -> None
 
 class BitcoinRPC:
     """Cliente somente leitura; nao usa RPC de carteira nem envia transacoes."""
-    def __init__(self, url: str, cookie_file: str | Path):
+    def __init__(self, url: str, cookie_file: str | Path, ca_file=None):
+        from .security import secure_opener
         parsed = urlsplit(url)
-        if parsed.scheme not in {"http", "https"} or not parsed.hostname or parsed.username or parsed.password:
+        if (parsed.scheme not in {"http", "https"} or not parsed.hostname or parsed.username or parsed.password
+                or parsed.query or parsed.fragment or parsed.path not in {"", "/"}):
             raise RegistryError("RPC invalido. Informe URL sem credenciais e um arquivo cookie separado.")
         if parsed.scheme == "http" and parsed.hostname not in {"localhost", "127.0.0.1", "::1"}:
             raise RegistryError("RPC remoto exige HTTPS; HTTP permitido somente no proprio servidor.")
         self.url, self.cookie_file = url, Path(cookie_file).expanduser()
+        self.opener = secure_opener(ca_file)
 
     def call(self, method: str, *params):
+        from .security import read_json
         if method not in {"getblockchaininfo", "getblockhash", "getblockheader"}:
             raise RegistryError("RPC de escrita nao permitido neste modulo.")
         auth = base64.b64encode(self.cookie_file.read_bytes().strip()).decode("ascii")
@@ -115,8 +119,8 @@ class BitcoinRPC:
                                                     "params": list(params)}).encode(),
                           headers={"Content-Type": "application/json", "Authorization": "Basic " + auth})
         try:
-            with urlopen(request, timeout=15) as response:
-                result = json.loads(response.read(1024 * 1024))
+            with self.opener.open(request, timeout=15) as response:
+                result = read_json(response)
         except Exception as exc:
             raise RegistryError("Falha ao consultar Bitcoin Core. Confira disponibilidade e cookie RPC.") from exc
         if result.get("error"):
