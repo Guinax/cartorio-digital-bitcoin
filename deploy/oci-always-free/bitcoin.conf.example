@@ -1,0 +1,15 @@
+# OCI Always Free ARM64 example; Bitcoin Core mainnet with pruning.
+# Adjust paths and filesystem permissions locally, never expose RPC.
+# Must validate all chain data on IBD; full archival data is NOT retained.
+chain=main
+server=1
+disablewallet=1
+prune=20000
+txindex=0
+blocksonly=0
+dbcache=1024
+maxconnections=30
+rpcbind=127.0.0.1
+rpcallowip=127.0.0.1
+# Pair with CLN network=bitcoin and continuous sync monitoring.
+# Keep bitcoind's data on the attached persistent block volume.
