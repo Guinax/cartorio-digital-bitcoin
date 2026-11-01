@@ -5,6 +5,12 @@ x-lightning: &lightning
   build:
     context: .
     dockerfile: Dockerfile.cln
+  # Executa o daemon em primeiro plano. O wrapper da imagem usa um diretorio
+  # calculado por LIGHTNINGD_NETWORK (bitcoin por padrao), antes do RPC existir.
+  entrypoint: ["lightningd"]
+  init: true
+  environment:
+    LIGHTNINGD_NETWORK: regtest
   depends_on:
     - bitcoin
   restart: unless-stopped
