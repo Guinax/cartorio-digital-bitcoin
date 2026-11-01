@@ -132,7 +132,7 @@ docker compose -f laboratorio-lightning/compose.yaml down
 - Portas dos contêineres não são publicadas para a internet. A rede Docker é interna.
 - A senha RPC publicada no arquivo é **apenas para este regtest isolado**. Nunca reutilize em mainnet.
 - Os volumes Docker persistem entre execuções. Para recomeçar do zero, é preciso remover os volumes deliberadamente, o que **apaga apenas os dados fictícios do laboratório**.
-- Imagens e script tiveram revisão estática, mas o laboratório **ainda precisa ser executado no Codespaces**. A conclusão só é comprovada quando o script exibir SUCESSO e taxas positivas.
+- O laboratorio e a integracao de documentos foram executados com sucesso no GitHub Actions em 01/11/2026: [resultado da execucao](https://github.com/Guinax/cartorio-digital-bitcoin/actions/runs/41324043597). A instalacao em cada Codespace ainda depende do estado daquele ambiente; confirme `SUCESSO` no terminal ao executar ali.
 - Para operar um nó Lightning real, seria necessário capital em BTC, canais financiados, liquidez, backups seguros, monitoramento, disponibilidade e estudo dos custos e riscos. Não existe receita garantida por apenas manter um nó ligado.
 
 Documentação: [Core Lightning](https://docs.corelightning.org/docs/beginners-guide) · [Configuração](https://docs.corelightning.org/docs/configuration) · [Taxas de canal](https://docs.corelightning.org/reference/setchannel).

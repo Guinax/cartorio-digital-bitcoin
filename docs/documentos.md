@@ -197,6 +197,26 @@ integracao em um servidor temporario do GitHub. O resumo publicado inclui
 somente os resultados e valores ficticios, sem chaves privadas, preimagens ou
 faturas. Pode ser repetido pela aba Actions, em `Run workflow`.
 
+### Integracao executada em 01/11/2026
+
+[Execucao aprovada no GitHub Actions](https://github.com/Guinax/cartorio-digital-bitcoin/actions/runs/41324043597),
+com 22 testes locais aprovados e pagamento A -> B -> C em nos Core Lightning
+e Bitcoin Core executados no servidor de testes:
+
+| Verificacao | Resultado |
+| --- | --- |
+| Comprovante assinado e arquivo original | Conferidos |
+| Arquivo alterado | Recusado |
+| Registro sem pagamento | Envio da prova bloqueado |
+| Repeticao da geracao de fatura | Mesma fatura, sem duplicacao |
+| Recebimento ficticio em C | 2.500.000 msat, equivalente a 2.500 sat |
+| Novo encaminhamento liquidado em B | 1 |
+| Nova taxa ficticia de B | 1.250 msat, equivalente a 1,25 sat |
+
+Todos os valores acima pertencem a regtest e nao definem um preco comercial.
+O teste nao movimentou BTC real nem confirmou uma prova de documento em
+Bitcoin mainnet. O modulo continua com tarifa padrao zero para novos registros.
+
 Referencias primarias:
 
 - [OpenTimestamps](https://opentimestamps.org/)
