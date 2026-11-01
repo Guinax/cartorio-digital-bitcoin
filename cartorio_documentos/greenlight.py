@@ -10,7 +10,7 @@ import re
 from pathlib import Path
 
 from .registry import RegistryError
-from .security import private_read
+from .security import private_read_binary
 
 _NODE_ID = re.compile(r"0[23][0-9a-f]{64}")
 
@@ -44,7 +44,7 @@ class GreenlightStatus:
 
     def check(self) -> dict:
         # Read secret credentials with O_NOFOLLOW and 0600/0400 before any RPC.
-        data = private_read(self.credentials_path)
+        data = private_read_binary(self.credentials_path)
         sdk = self.sdk
         if sdk is None:
             try:
