@@ -1,0 +1,5 @@
+# Bitcoin Core e Core Lightning para REDE FICTICIA regtest.
+FROM bitcoin/bitcoin:29.4 AS bitcoincore
+FROM elementsproject/lightningd:v26.06.6
+# O plugin bcli do Core Lightning precisa encontrar bitcoin-cli.
+COPY --from=bitcoincore /usr/local/bin/bitcoin-cli /usr/local/bin/bitcoin-cli
