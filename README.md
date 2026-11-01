@@ -1,5 +1,26 @@
 # Cartório Digital Bitcoin
 
+## Registro de documentos
+
+O projeto agora inclui o modulo real `cartorio_documentos`: SHA-256 do arquivo,
+comprovante assinado com Ed25519, prova de existencia OpenTimestamps exportavel,
+verificacao contra Bitcoin Core mainnet e cobranca opcional por Core Lightning.
+O original permanece com o operador; apenas seu hash e metadados minimos ficam
+no banco local. Os calendarios recebem um compromisso com nonce.
+
+**Um registro local ou uma prova pendente ainda nao e confirmacao no Bitcoin.**
+A confirmacao exige uma prova OTS completa e Bitcoin Core mainnet sincronizado.
+Este servico registra integridade e existencia; nao comprova autoria, identidade
+ou veracidade do documento e nao emite atos de um cartorio oficial.
+
+Instalacao e comandos: [manual do modulo](docs/documentos.md).
+
+O modulo nao controla a rede Bitcoin nem cobra por transacoes observadas.
+A tarifa de registro remunera o nosso servico. Taxas de roteamento Lightning
+ocorrem apenas nos pagamentos encaminhados com sucesso pelo proprio no.
+
+## Laboratorio Lightning existente
+
 Laboratório experimental de infraestrutura Lightning, totalmente **separado do Mundo Pet e da Mansão Maromba**.
 
 ## O que demonstra

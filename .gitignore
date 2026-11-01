@@ -4,3 +4,10 @@ __pycache__/
 .env.*
 !.env.example
 .DS_Store
+.cartorio-documentos/
+.venv/
+*.sqlite3
+*.sqlite3-*
+issuer-private.pem
+*.ots
+*.ots.bak
