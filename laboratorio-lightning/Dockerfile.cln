@@ -1,5 +1,5 @@
-# Bitcoin Core e Core Lightning para REDE FICTICIA regtest.
+# Binarios usados exclusivamente no laboratorio regtest (SEM mainnet).
 FROM bitcoin/bitcoin:29.4 AS bitcoincore
 FROM elementsproject/lightningd:v26.06.6
-# O plugin bcli do Core Lightning precisa encontrar bitcoin-cli.
-COPY --from=bitcoincore /usr/local/bin/bitcoin-cli /usr/local/bin/bitcoin-cli
+# A imagem oficial do Bitcoin Core instala em /opt/bitcoin-29.4/bin.
+COPY --from=bitcoincore /opt/bitcoin-29.4/bin/bitcoin-cli /usr/local/bin/bitcoin-cli
