@@ -127,7 +127,7 @@ crie um diretorio de producao separado, preservando o laboratorio.
 
 - permissoes privadas, chave criptografada e integridade do banco;
 - backup recente, autenticado e vinculado ao emissor;
-- sinal recente de atividade do worker;
+- sinal recente de atividade do worker e ausencia de falhas pendentes na fila;
 - rede main, bloco genesis mainnet, sincronizacao e idade da ponta Bitcoin;
 - identidade mainnet esperada do CLN, sincronizacao e capacidade estimada de
   recebimento em canais ativos e conectados.

@@ -134,6 +134,10 @@ def doctor(config, registry, *, rpc=None, node=None, required_msat=None, clock=N
         age = clock - datetime.fromisoformat(status["checked_at"]).timestamp()
         if status.get("network") != "bitcoin" or not 0 <= age <= config["worker_interval_seconds"] * 2:
             raise RegistryError("Worker nao iniciou ou seu sinal de atividade esta antigo.")
+        with registry.connection() as db:
+            if db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='processing_jobs'").fetchone():
+                if db.execute("SELECT 1 FROM processing_jobs WHERE failures > 0 LIMIT 1").fetchone():
+                    raise RegistryError("A fila possui falhas ainda nao resolvidas. Novas faturas ficam pausadas.")
         return {"age_seconds": int(age)}
     check("worker_heartbeat", heartbeat)
 

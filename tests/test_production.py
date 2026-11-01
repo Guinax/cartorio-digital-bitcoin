@@ -200,7 +200,9 @@ class ProductionTest(unittest.TestCase):
             first = run_once(self.config, self.registry, node=self.node, rpc=self.rpc)
             second = run_once(self.config, self.registry, node=self.node, rpc=self.rpc)
             self.assertEqual(first["errors"], 1)
+            self.assertFalse(first["health"]["ready_for_receiving"])
             self.assertEqual(second["processed"], 0)
+            self.assertFalse(second["health"]["ready_for_receiving"])
             self.assertEqual(submit.call_count, 1)
             with self.registry.connection() as db:
                 job = db.execute("SELECT failures, next_run_at FROM processing_jobs WHERE record_id = ?", (self.id,)).fetchone()
