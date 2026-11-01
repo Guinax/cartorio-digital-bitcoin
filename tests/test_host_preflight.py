@@ -40,11 +40,11 @@ class HostPreflightTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             root = Path(d)
             (root / "proc").mkdir()
-            (root / "proc/meminfo").write_text("MemTotal: 12582912 kB\\n")
+            (root / "proc/meminfo").write_text("MemTotal: 12582912 kB\n")
             disk = type("Disk", (), {"total": 150 * 10**9, "free": 80 * 10**9})()
-            with patch.object(module.platform, "system", return_value="Linux"), \\
-                    patch.object(module.shutil, "which", return_value="/usr/bin/fake"), \\
-                    patch.object(module.shutil, "disk_usage", return_value=disk):
+            with (patch.object(module.platform, "system", return_value="Linux"),
+                  patch.object(module.shutil, "which", return_value="/usr/bin/fake"),
+                  patch.object(module.shutil, "disk_usage", return_value=disk)):
                 archive = module.run(root, sys_root=root)
                 pruned = module.run(root, sys_root=root, min_volume_gib=120,
                                     min_free_gib=35, min_ram_gib=8)
