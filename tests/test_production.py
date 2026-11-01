@@ -134,6 +134,21 @@ class ProductionTest(unittest.TestCase):
         self.rpc.genesis = "00" * 32
         self.assertFalse(self.diagnose()["ready_for_receiving"])
 
+    def test_pruned_bitcoin_core_keeps_a_safe_window_for_lightning(self):
+        self.rpc.info.update({"pruned": True, "pruneheight": 799000})
+        self.assertTrue(self.diagnose()["ready_for_receiving"])
+        self.rpc.info["pruneheight"] = 799900
+        self.assertFalse(self.diagnose()["ready_for_receiving"])
+        self.rpc.info["pruneheight"] = 800000
+        self.assertFalse(self.diagnose()["ready_for_receiving"])
+        self.rpc.info["pruneheight"] = -1
+        self.assertFalse(self.diagnose()["ready_for_receiving"])
+        self.rpc.info.pop("pruneheight")
+        self.assertFalse(self.diagnose()["ready_for_receiving"])
+        self.rpc.info["pruneheight"] = 799000
+        self.node.info["blockheight"] = 799010
+        self.assertFalse(self.diagnose()["ready_for_receiving"])
+
     def test_wrong_lightning_identity_warning_or_no_inbound_blocks_receiving(self):
         original = copy.deepcopy(self.node.info)
         for change in ({"id": "03" + "22" * 32}, {"network": "regtest"}, {"warning_bitcoind_sync": "syncing"}):

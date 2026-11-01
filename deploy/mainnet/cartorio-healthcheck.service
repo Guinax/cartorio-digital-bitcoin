@@ -1,0 +1,20 @@
+[Unit]
+Description=Cartorio Bitcoin mainnet - read-only readiness check
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=cartorio
+Group=cartorio
+WorkingDirectory=/opt/cartorio
+ExecStart=/opt/cartorio/.venv/bin/python -m cartorio_documentos --config /etc/cartorio/config.json doctor
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+StandardOutput=journal
+StandardError=journal

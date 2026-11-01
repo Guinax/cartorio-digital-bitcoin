@@ -151,7 +151,13 @@ def doctor(config, registry, *, rpc=None, node=None, required_msat=None, clock=N
                 or not -7200 <= clock - info.get("time", 0) <= config["max_tip_age_seconds"]
                 or rpc.call("getblockhash", 0) != MAINNET_GENESIS):
             raise RegistryError("Bitcoin mainnet nao esta sincronizado ou ponta esta antiga.")
-        return {"network": "main", "height": info["blocks"]}
+        # A VM Always Free usa Bitcoin Core podado. Checar a janela local
+        # antes de considerar a sincronizacao saudável; nao basta ter a ponta.
+        if info.get("pruned") is True:
+            height = info.get("pruneheight")
+            if type(height) is not int or not 0 <= height <= info["blocks"]:
+                raise RegistryError("Bitcoin Core podado sem altura de retencao valida.")
+        return {"network": "main", "height": info["blocks"], "pruned": info.get("pruned") is True}
     check("bitcoin_mainnet_synced", bitcoin)
 
     def lightning():
@@ -161,6 +167,8 @@ def doctor(config, registry, *, rpc=None, node=None, required_msat=None, clock=N
                 or data.get("warning_bitcoind_sync") or data.get("warning_lightningd_sync")
                 or info is None or abs(data.get("blockheight", -100) - info["blocks"]) > 2):
             raise RegistryError("Lightning errado ou nao sincronizado.")
+        if info.get("pruned") is True and data["blockheight"] - info["pruneheight"] < 144:
+            raise RegistryError("Core Lightning esta proximo da janela podada do Bitcoin Core.")
         channels = client.call("listpeerchannels").get("channels", [])
         inbound = sum(msat(row.get("receivable_msat", 0)) for row in channels
                       if row.get("state") == "CHANNELD_NORMAL" and row.get("peer_connected") is True

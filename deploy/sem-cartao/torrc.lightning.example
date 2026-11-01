@@ -1,0 +1,8 @@
+# Merge into /etc/tor/torrc only after reviewing Tor permissions.
+# Tor-created v3 hidden service for Lightning on localhost. No public port-forward.
+# The directory is a Tor secret; never copy it to GitHub or backups accessible to others.
+HiddenServiceDir /var/lib/tor/cartorio-lightning_v3/
+HiddenServiceVersion 3
+HiddenServicePort 9735 127.0.0.1:9735
+# Tor must be running and the Lightning listener must be bound locally.
+# Get the generated onion hostname locally, do not share its private key.

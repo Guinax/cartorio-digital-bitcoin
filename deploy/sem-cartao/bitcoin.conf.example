@@ -1,0 +1,12 @@
+# Home Linux host / Bitcoin Core mainnet (pruned). Review paths and service identity.
+chain=main
+server=1
+disablewallet=1
+prune=20000
+txindex=0
+blocksonly=0
+dbcache=512
+maxconnections=20
+rpcbind=127.0.0.1
+rpcallowip=127.0.0.1
+# Never open 8332 to the internet. Configure CLN cookie group access securely.

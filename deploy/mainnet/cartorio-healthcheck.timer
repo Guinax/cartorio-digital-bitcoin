@@ -1,0 +1,11 @@
+[Unit]
+Description=Cartorio Bitcoin mainnet - run readiness checks every five minutes
+
+[Timer]
+OnBootSec=10min
+OnUnitActiveSec=5min
+AccuracySec=30s
+Unit=cartorio-healthcheck.service
+
+[Install]
+WantedBy=timers.target

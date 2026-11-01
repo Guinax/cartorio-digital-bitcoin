@@ -58,3 +58,20 @@ def read_json(response, limit=1024 * 1024):
     if len(raw) > limit:
         raise RegistryError("Resposta remota excedeu o limite permitido.")
     return json.loads(raw)
+
+
+def private_read_binary(path: str | Path) -> bytes:
+    """Read an opaque binary credential exactly, without trimming bytes.
+
+    Prevent following a symlink and refuse world/group accessible files.
+    This deliberately differs from private_read(), which strips text secrets.
+    """
+    fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+    with os.fdopen(fd, "rb") as source:
+        info = os.fstat(source.fileno())
+        if not stat.S_ISREG(info.st_mode) or info.st_mode & 0o077:
+            raise RegistryError("Credencial binaria exige arquivo regular privado (0600/0400).")
+        value = source.read(65537)
+    if not value or len(value) > 65536:
+        raise RegistryError("Credencial binaria ausente ou excessivamente grande.")
+    return value

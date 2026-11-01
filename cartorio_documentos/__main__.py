@@ -43,6 +43,10 @@ def parser():
     commands = root.add_subparsers(dest="action", required=True)
     commands.add_parser("init", help="Inicializa banco e chave local sem substituir chave existente.")
     commands.add_parser("protect-key", help="Criptografa a chave existente preservando a identidade do emissor.")
+    greenlight = commands.add_parser("greenlight-status", help="Conecta ao no Greenlight somente para consultar identidade; sem pagamentos.")
+    greenlight.add_argument("--device-credentials-file", type=Path, required=True)
+    greenlight.add_argument("--expected-node-id", required=True, help="Chave publica comprimida 02/03... esperada do seu no.")
+    greenlight.add_argument("--greenlight-network", choices=["bitcoin", "testnet"], default="bitcoin")
     commands.add_parser("doctor", help="Diagnostico mainnet somente leitura; exige --config.")
     commands.add_parser("backup", help="Backup autenticado e criptografado; exige --config.")
     restore = commands.add_parser("restore", help="Restaura em diretorio novo; exige --config.")
@@ -76,6 +80,10 @@ def parser():
 
 
 def run(args):
+    # Sem perfil de producao nao ha limite de faturas, auditoria nem gate.
+    # Proibir a rede monetaria no caminho legado evita uma ativacao acidental.
+    if not args.config and args.network == "bitcoin":
+        raise RegistryError("Mainnet exige --config com perfil de producao; nunca use --network bitcoin isoladamente.")
     if args.config:
         from .production import load_config, registry_for
         args.config_data = load_config(args.config)
@@ -100,6 +108,10 @@ def run(args):
             target.flush()
             os.fsync(target.fileno())
         return {"created": True, "path": str(args.out), "notice": "Guarde esta chave fora do servidor e separada dos backups."}
+    if args.action == "greenlight-status":
+        from .greenlight import GreenlightStatus
+        return GreenlightStatus(args.device_credentials_file, args.expected_node_id,
+                                network=args.greenlight_network).check()
     if args.action == "doctor":
         from .production import doctor
         return doctor(args.config_data, registry)
